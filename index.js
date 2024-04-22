@@ -13,14 +13,23 @@ const app = express();
 
 app.use(cookieParser());
 app.use(express.json());
+
+const allowedOrigins = [process.env.ALLOWED_SITE];
+
 app.use(
     cors({
-        origin: true,
+        origin: function (origin, callback) {
+            if (!origin || allowedOrigins.includes(origin)) {
+                callback(null, true);
+            } else {
+                callback(new Error("Not allowed by CORS"));
+            }
+        },
         credentials: true,
     })
 );
 
-app.use("/", router);
+app.use("/api", router);
 
 mongoose
     .connect(process.env.DB_ACCESS)
